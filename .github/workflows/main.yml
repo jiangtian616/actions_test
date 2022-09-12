@@ -1,5 +1,4 @@
 name: Build & Release
-
 on: push
 
 # 1. If we push to master with a tag, we will trigger workflow twice, use [concurrency] to prevent this
@@ -8,23 +7,23 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  FLUTTER_VERSION: '3.3.1'
 
 jobs:
   Build:
+    env:
+      FLUTTER_VERSION: '3.3.1'
     strategy:
       fail-fast: false
       matrix:
         include:
           - target: android
             os: ubuntu-latest
-            flutter_version: ${{ ENV.FLUTTER_VERSION }}
+            flutter_version: ${{ env.FLUTTER_VERSION }}
             artifact_name: release-apk
             artifact_path: build/app/outputs/apk/release/*.apk
           - target: ios
             os: macos-latest
-            flutter_version: ${{ ENV.FLUTTER_VERSION }}
+            flutter_version: ${{ env.FLUTTER_VERSION }}
             artifact_name: release-ios
             artifact_path: build/**/*.ipa
             cache_key: ios-pods-${{ hashFiles('.github/workflows/main.yml') }}
@@ -32,7 +31,7 @@ jobs:
             cache_restore_keys: macos-pods-
           - target: macos
             os: macos-latest
-            flutter_version: ${{ ENV.FLUTTER_VERSION }}
+            flutter_version: ${{ env.FLUTTER_VERSION }}
             artifact_name: release-mac
             artifact_path: build/macos/*.zip
             cache_key: (macos-pods-${{ hashFiles('.github/workflows/main.yml') }})
@@ -40,7 +39,7 @@ jobs:
             cache_restore_keys: macos-pods-
           - target: windows
             os: windows-latest
-            flutter_version: ${{ ENV.FLUTTER_VERSION }}
+            flutter_version: ${{ env.FLUTTER_VERSION }}
             artifact_name: release-windows
             artifact_path: build/windows/*.zip
     runs-on: ${{ matrix.os }}
@@ -49,7 +48,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: 'recursive'
-      - name: Cache Pods (build ios)
+      - name: Cache
         uses: actions/cache@v3
         with:
           key: ${{ ${{ matrix.cache_key }} }}
