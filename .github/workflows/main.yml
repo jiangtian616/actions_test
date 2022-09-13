@@ -1,15 +1,28 @@
 name: Release
 
-on: push
+on:
+  push:
+    branches:
+      - 'master'
+    tags:
+      - v*
+
+# 1. If we push to master with a tag, we will trigger workflow twice, use [concurrency] to prevent this
+# 2. If last workflow is still running, we push again, we will cancel the previous workflow
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   Publish:
     name: Publish
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Upload to release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.ref_name }}
           allowUpdates: true
-          bodyFile: changelog/${{ github.ref_name }}.md
+          bodyFile: changelog/${{   github.ref_name }}.md
